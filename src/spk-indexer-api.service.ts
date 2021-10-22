@@ -37,7 +37,7 @@ export class SpkIndexerApi {
   public async getDocument(streamId: string): Promise<DocumentView> {
     try {
       const res = await axios.get<DocumentView>(
-        `${this.apiBaseUrl}/indexer/${streamId}`
+        `${this.apiBaseUrl}/indexer/documents/${streamId}`
       )
       return res.data
     } catch (err: any) {
