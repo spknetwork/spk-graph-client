@@ -22,9 +22,10 @@ export interface UpdateDocument {
 
 export interface DocumentView {
   streamId: string
-  parent_id?: string
+  parentId?: string
   content: unknown
-  creator_id: string
+  creatorId: string
+  permlink?: string
 }
 
 export interface CeramicDocContent {
