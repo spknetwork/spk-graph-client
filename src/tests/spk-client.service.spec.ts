@@ -1,4 +1,3 @@
-import { create } from 'domain'
 import { SpkClient } from '../spk-client'
 import { getTestCeramicClient } from '../util/get-test-ceramic-client.function'
 import { Timer } from '../util/timer.service'
@@ -88,5 +87,11 @@ describe('spk client should operate', () => {
     const fetchedTwo = await spkClient.fetchDocument(created.streamId)
 
     expect(fetchedTwo.content).toEqual(newContent)
+  })
+
+  it('should throw error if no doc', async () => {
+    expect(async () => {
+      await spkClient.updateDocument('nonexistentstreamid', {})
+    }).rejects.toThrow(Error)
   })
 })

@@ -6,8 +6,9 @@ import { ConfigService } from './config.service'
 import { CeramicDocContent, DocumentView } from './spk-client.types'
 import { SpkIndexerApi } from './spk-indexer-api.service'
 import base64url from 'base64url'
-import Crypto from 'crypto'
+import { randomBytes } from 'crypto'
 import { Timer } from './util/timer.service'
+import { IDX_ROOT_DOCS_KEY } from './common/constants'
 
 export class SpkClient {
   /**
@@ -27,10 +28,12 @@ export class SpkClient {
   }
 
   public async updateDocument(streamId: string, content: unknown): Promise<void> {
-    const doc = await TileDocument.load<CeramicDocContent>(this.ceramic, streamId)
-
-    if (!doc) {
-      throw new NotFoundException(`Could not find ceramic doc with stream id ${streamId}!`)
+    let doc: TileDocument<CeramicDocContent>
+    try {
+      doc = await TileDocument.load<CeramicDocContent>(this.ceramic, streamId)
+    } catch (err: any) {
+      console.error(`Could not load doc for update: `, err.message)
+      throw err
     }
 
     await doc.update({ content }, undefined, { anchor: true })
@@ -72,15 +75,6 @@ export class SpkClient {
     }
   }
 
-  public async requestDocReindex(streamId: string): Promise<void> {
-    try {
-      await this.apiClient.requestDocumentReindex(streamId)
-    } catch (err: any) {
-      console.error(`Error requesting document reindex on spk indexer daemon! ${err.message}`)
-      throw err
-    }
-  }
-
   get loggedInDid(): string {
     if (!this.ceramic.did?.id) throw new Error(`User not logged in, could not retrieve DID`)
 
@@ -112,7 +106,7 @@ export class SpkClient {
     // Add to root posts on ceramic
     try {
       timer.start()
-      await this.recordDocToRootPosts(doc.id.toUrl(), creatorId)
+      await this.recordDocToRootPosts(doc.id.toString(), creatorId)
       timer.stop('Root post recorded')
     } catch (err: any) {
       console.error(`Error recording doc to root posts!`, err.message)
@@ -132,17 +126,17 @@ export class SpkClient {
   }
 
   public async recordDocToRootPosts(streamIdUrl: string, userDid: string): Promise<void> {
-    const permlink = base64url.encode(Crypto.randomBytes(6))
+    const permlink = base64url.encode(randomBytes(6))
 
-    let rootPosts = (await this.idx.get('rootPosts', userDid)) as Record<string, string>
-    if (rootPosts) {
-      rootPosts[permlink] = streamIdUrl
+    let rootDocs = (await this.idx.get(IDX_ROOT_DOCS_KEY, userDid)) as Record<string, string>
+    if (rootDocs) {
+      rootDocs[permlink] = streamIdUrl
     } else {
-      rootPosts = {
+      rootDocs = {
         [permlink]: streamIdUrl,
       }
     }
 
-    await this.idx.set('rootPosts', rootPosts)
+    await this.idx.set(IDX_ROOT_DOCS_KEY, rootDocs)
   }
 }
