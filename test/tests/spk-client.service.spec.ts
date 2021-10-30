@@ -1,6 +1,6 @@
-import { SpkClient } from '../spk-client'
+import CeramicClient from '@ceramicnetwork/http-client'
+import { SpkClient } from '../../src/spk-client'
 import { getTestCeramicClient } from '../util/get-test-ceramic-client.function'
-import { Timer } from '../util/timer.service'
 
 const CERAMIC_HOST = 'http://localhost:7007'
 // const CERAMIC_HOST = 'https://ceramic-clay.3boxlabs.com'
@@ -19,7 +19,10 @@ async function sleep(ms: number): Promise<void> {
 describe('spk client should operate', () => {
   let spkClient: SpkClient
   beforeAll(async () => {
-    const ceramic = await getTestCeramicClient(CERAMIC_HOST)
+    const ceramic = global.ceramic as CeramicClient
+    if (!global.ceramic) {
+      throw new Error('ceramic session not available in the global namespace')
+    }
     spkClient = new SpkClient(INDEXER_API_HOST, ceramic)
   })
 
@@ -27,7 +30,6 @@ describe('spk client should operate', () => {
     const docContent = { key: 'value' }
     const doc2Content = { key: 'value' }
 
-    const timer = new Timer()
     const created = await spkClient.createDocument(docContent)
     const created2 = await spkClient.createDocument(doc2Content)
     await sleep(300)
@@ -44,7 +46,6 @@ describe('spk client should operate', () => {
     const docContent = { key: 'value' }
     const doc2Content = { key: 'value2' }
 
-    const timer = new Timer()
     const created = await spkClient.createDocument(docContent)
     const created2 = await spkClient.createDocument(doc2Content)
     await sleep(300)
