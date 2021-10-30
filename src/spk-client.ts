@@ -1,13 +1,11 @@
 import { CeramicClient } from '@ceramicnetwork/http-client'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { IDX } from '@ceramicstudio/idx'
-import { NotFoundException, NotImplementedException } from './common/exceptions'
 import { ConfigService } from './config.service'
 import { CeramicDocContent, DocumentView } from './spk-client.types'
 import { SpkIndexerApi } from './spk-indexer-api.service'
 import base64url from 'base64url'
-import { randomBytes } from 'crypto'
-import { Timer } from './util/timer.service'
+import { randomBytes } from '@stablelib/random'
 import { IDX_ROOT_DOCS_KEY } from './common/constants'
 
 export class SpkClient {
@@ -90,8 +88,6 @@ export class SpkClient {
       throw new Error(`User not authenticated with ceramic`)
     }
 
-    const timer = new Timer()
-    timer.start()
     const doc = await TileDocument.create<CeramicDocContent>(
       this.ceramic,
       {
@@ -101,21 +97,16 @@ export class SpkClient {
       { tags: ['spk_network'], controllers: [creatorId] },
       { anchor: true, publish: false },
     )
-    timer.stop('Tile doc created')
 
-    // Add to root posts on ceramic
+    // TODO: restrict this to parent docs only once corresponding backend features are ready
     try {
-      timer.start()
       await this.recordDocToRootPosts(doc.id.toString(), creatorId)
-      timer.stop('Root post recorded')
     } catch (err: any) {
       console.error(`Error recording doc to root posts!`, err.message)
       throw err
     }
 
-    timer.start()
     await this.requestDocInitialIndex(doc.id.toString())
-    timer.stop('Doc initial index requested')
 
     return {
       creatorId: creatorId,
@@ -126,7 +117,7 @@ export class SpkClient {
   }
 
   public async recordDocToRootPosts(streamIdUrl: string, userDid: string): Promise<void> {
-    const permlink = base64url.encode(randomBytes(6))
+    const permlink = base64url.encode(randomBytes(6).buffer as Buffer)
 
     let rootDocs = (await this.idx.get(IDX_ROOT_DOCS_KEY, userDid)) as Record<string, string>
     if (rootDocs) {
