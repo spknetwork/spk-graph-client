@@ -10,7 +10,8 @@
     "build": "tsc",
     "test:report": "sensible-browser ./coverage/lcov-report/index.html",
     "test": "jest --coverage",
-    "publish-local-schemas": "ts-node src/util/publish-local-schemas.ts"
+    "publish-local-schemas": "ts-node src/util/publish-local-schemas.ts",
+    "postinstall": "tsc"
   },
   "author": "",
   "license": "ISC",
