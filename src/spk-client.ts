@@ -74,6 +74,10 @@ export class SpkClient {
       throw err
     }
   }
+  
+  public async getFeedDocs(options?: { page?: number; pageSize?: number }) {
+    return await this.apiClient.getFeedDocs(options?.page, options?.pageSize)
+  }
 
   get loggedInDid(): string {
     if (!this.ceramic.did?.id) throw new Error(`User not logged in, could not retrieve DID`)
