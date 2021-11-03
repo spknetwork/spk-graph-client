@@ -1,9 +1,6 @@
 import CeramicClient from '@ceramicnetwork/http-client'
 import { SpkClient } from '../../src/spk-client'
-import { getTestCeramicClient } from '../util/get-test-ceramic-client.function'
 
-const CERAMIC_HOST = 'http://localhost:7007'
-// const CERAMIC_HOST = 'https://ceramic-clay.3boxlabs.com'
 const INDEXER_API_HOST = 'http://localhost:4567'
 
 jest.setTimeout(20000)
@@ -91,7 +88,7 @@ describe('spk client should operate', () => {
   })
 
   it('should throw error if no doc', async () => {
-    expect(async () => {
+    await expect(async () => {
       await spkClient.updateDocument('nonexistentstreamid', {})
     }).rejects.toThrow(Error)
   })
