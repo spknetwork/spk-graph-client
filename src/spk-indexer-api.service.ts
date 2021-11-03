@@ -105,4 +105,19 @@ export class SpkIndexerApi {
       )
     }
   }
+
+  public async getFeedDocs(page?: number, pageSize?: number) {
+    const config: AxiosRequestConfig = {
+      params: {
+        page,
+        pageSize,
+      },
+    }
+    try {
+      const res = await axios.get<DocumentView[]>(`${this.apiBaseUrl}/indexer/feed`, config)
+      return res.data
+    } catch (err: any) {
+      throw new Error(`Problem fetching document feed: ${err.message}`)
+    }
+  }
 }
