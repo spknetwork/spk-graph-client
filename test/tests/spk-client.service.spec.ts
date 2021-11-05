@@ -34,6 +34,7 @@ describe('spk client should operate', () => {
       const fetched = await spkClient.fetchDocument(created.streamId)
 
       expect(created.content).toEqual(fetched.content)
+      expect(created.createdAt).toEqual(fetched.createdAt)
     } catch (err) {
       console.error(`error fetching doc ${err}`)
     }
@@ -85,6 +86,7 @@ describe('spk client should operate', () => {
     const fetchedTwo = await spkClient.fetchDocument(created.streamId)
 
     expect(fetchedTwo.content).toEqual(newContent)
+    expect(fetchedOne.createdAt).toEqual(fetchedTwo.createdAt)
   })
 
   it('should throw error if no doc', async () => {

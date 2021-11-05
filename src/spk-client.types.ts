@@ -25,10 +25,11 @@ export interface DocumentView {
   parentId?: string
   content: unknown
   creatorId: string
-  permlink?: string
+  createdAt: Date
 }
 
 export interface CeramicDocContent {
   parent_id?: string
+  created_at: Date
   content: unknown
 }

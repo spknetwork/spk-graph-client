@@ -34,7 +34,7 @@ export class SpkClient {
       throw err
     }
 
-    await doc.update({ content }, undefined, { anchor: true })
+    await doc.update({ ...(doc.content as any), content: content }, undefined, { anchor: true })
 
     await this.apiClient.requestDocumentReindex(streamId)
   }
@@ -72,7 +72,7 @@ export class SpkClient {
       throw err
     }
   }
-  
+
   public async getFeedDocs(options?: { page?: number; pageSize?: number }) {
     return await this.apiClient.getFeedDocs(options?.page, options?.pageSize)
   }
@@ -97,6 +97,7 @@ export class SpkClient {
       {
         parent_id: parentId,
         content,
+        created_at: new Date(),
       },
       { tags: ['spk_network'], controllers: [creatorId] },
       { anchor: true, publish: false },
@@ -117,6 +118,7 @@ export class SpkClient {
       streamId: doc.id.toString(),
       parentId: doc.content.parent_id,
       content: doc.content.content,
+      createdAt: doc.content.created_at,
     }
   }
 
