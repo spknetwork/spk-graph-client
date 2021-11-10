@@ -2,11 +2,12 @@ import { CeramicClient } from '@ceramicnetwork/http-client'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { IDX } from '@ceramicstudio/idx'
 import { ConfigService } from './config.service'
-import { CeramicDocContent, DocumentView } from './spk-client.types'
+import { CeramicDocContent, DocumentView } from './spk-client.model'
 import { SpkIndexerApi } from './spk-indexer-api.service'
 import base64url from 'base64url'
 import { randomBytes } from '@stablelib/random'
 import { IDX_ROOT_DOCS_KEY } from './common/constants'
+import { DocSortOption } from '.'
 
 export class SpkClient {
   /**
@@ -49,11 +50,12 @@ export class SpkClient {
 
   public async getDocumentsForUser(
     userId: string,
-    page?: number,
-    pageSize?: number,
+    sort: DocSortOption = DocSortOption.createddesc,
+    page = 1,
+    pageSize = 25,
   ): Promise<DocumentView[]> {
     try {
-      return await this.apiClient.getDocsForUser(userId, page, pageSize)
+      return await this.apiClient.getDocsForUser(userId, sort, page, pageSize)
     } catch (err) {
       console.error(`Error getting docs for user!`, err)
       throw err
@@ -62,10 +64,11 @@ export class SpkClient {
 
   public async getDocumentChildren(
     parentDocId: string,
-    page?: number,
-    pageSize?: number,
+    sort: DocSortOption = DocSortOption.createddesc,
+    page = 1,
+    pageSize = 25,
   ): Promise<DocumentView[]> {
-    return await this.apiClient.getDocChildren(parentDocId, page, pageSize)
+    return await this.apiClient.getDocChildren(parentDocId, sort, page, pageSize)
   }
 
   public async requestDocInitialIndex(streamId: string): Promise<void> {

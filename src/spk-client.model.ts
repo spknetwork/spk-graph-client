@@ -35,3 +35,10 @@ export interface CeramicDocContent {
   updated_at: string
   content: unknown
 }
+
+export enum DocSortOption {
+  createdasc = 'createdasc',
+  createddesc = 'createddesc',
+  updatedasc = 'updatedasc',
+  updateddesc = 'updateddesc',
+}
