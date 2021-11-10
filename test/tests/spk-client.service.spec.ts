@@ -1,5 +1,6 @@
 import CeramicClient from '@ceramicnetwork/http-client'
 import { SpkClient } from '../../src/spk-client'
+import { differenceInMilliseconds } from 'date-fns'
 
 const INDEXER_API_HOST = 'http://localhost:4567'
 
@@ -87,6 +88,11 @@ describe('spk client should operate', () => {
 
     expect(fetchedTwo.content).toEqual(newContent)
     expect(fetchedOne.createdAt).toEqual(fetchedTwo.createdAt)
+    expect(fetchedOne.updatedAt).toBeDefined()
+    expect(fetchedTwo.updatedAt).toBeDefined()
+    expect(
+      differenceInMilliseconds(new Date(fetchedTwo.updatedAt), new Date(fetchedOne.updatedAt)),
+    ).toBeGreaterThan(0)
   })
 
   it('should throw error if no doc', async () => {

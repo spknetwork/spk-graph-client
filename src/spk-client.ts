@@ -34,7 +34,11 @@ export class SpkClient {
       throw err
     }
 
-    await doc.update({ ...(doc.content as any), content: content }, undefined, { anchor: true })
+    await doc.update(
+      { ...(doc.content as any), updated_at: new Date().toISOString(), content: content },
+      undefined,
+      { anchor: true },
+    )
 
     await this.apiClient.requestDocumentReindex(streamId)
   }
@@ -92,12 +96,15 @@ export class SpkClient {
       throw new Error(`User not authenticated with ceramic`)
     }
 
+    const now = new Date()
+
     const doc = await TileDocument.create<CeramicDocContent>(
       this.ceramic,
       {
         parent_id: parentId,
         content,
-        created_at: new Date(),
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
       },
       { tags: ['spk_network'], controllers: [creatorId] },
       { anchor: true, publish: false },
@@ -119,6 +126,7 @@ export class SpkClient {
       parentId: doc.content.parent_id,
       content: doc.content.content,
       createdAt: doc.content.created_at,
+      updatedAt: doc.content.updated_at,
     }
   }
 

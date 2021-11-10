@@ -25,11 +25,13 @@ export interface DocumentView {
   parentId?: string
   content: unknown
   creatorId: string
-  createdAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CeramicDocContent {
   parent_id?: string
-  created_at: Date
+  created_at: string
+  updated_at: string
   content: unknown
 }
