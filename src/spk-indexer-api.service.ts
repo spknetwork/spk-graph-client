@@ -1,5 +1,6 @@
-import { DocumentView } from './spk-client.types'
+import { DocumentView } from './spk-client.model'
 import axios, { AxiosRequestConfig } from 'axios'
+import { DocSortOption } from '.'
 
 export class SpkIndexerApi {
   constructor(private readonly apiHost: string) {}
@@ -38,38 +39,16 @@ export class SpkIndexerApi {
 
   public async getDocsForUser(
     userId: string,
-    page?: number,
-    pageSize?: number,
+    sort: DocSortOption,
+    page: number,
+    pageSize: number,
   ): Promise<DocumentView[]> {
     const config: AxiosRequestConfig = {
       params: {
         page,
         pageSize,
         userId,
-      },
-    }
-
-    try {
-      const res = await axios.get<DocumentView[]>(
-        `${this.apiBaseUrl}/indexer/foruser/userdocuments`,
-        config,
-      )
-      return res.data
-    } catch (err: any) {
-      throw new Error(`Problem getting user docs for user ID ${userId}, ${err.message}`)
-    }
-  }
-
-  public async getDocsForUserFetch(
-    userId: string,
-    page?: number,
-    pageSize?: number,
-  ): Promise<DocumentView[]> {
-    const config: AxiosRequestConfig = {
-      params: {
-        page,
-        pageSize,
-        userId,
+        sort,
       },
     }
 
@@ -85,24 +64,24 @@ export class SpkIndexerApi {
   }
 
   public async getDocChildren(
-    parentStreamId: string,
-    page?: number,
-    pageSize?: number,
+    parentId: string,
+    sort: DocSortOption,
+    page: number,
+    pageSize: number,
   ): Promise<DocumentView[]> {
     const config: AxiosRequestConfig = {
       params: {
         page,
         pageSize,
-        parentId: parentStreamId,
+        parentId,
+        sort,
       },
     }
     try {
       const res = await axios.get<DocumentView[]>(`${this.apiBaseUrl}/indexer/children`, config)
       return res.data
     } catch (err: any) {
-      throw new Error(
-        `Problem getting doc children with parent id ${parentStreamId}: ${err.message}`,
-      )
+      throw new Error(`Problem getting doc children with parent id ${parentId}: ${err.message}`)
     }
   }
 

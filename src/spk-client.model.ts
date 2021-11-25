@@ -25,10 +25,20 @@ export interface DocumentView {
   parentId?: string
   content: unknown
   creatorId: string
-  permlink?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CeramicDocContent {
   parent_id?: string
+  created_at: string
+  updated_at: string
   content: unknown
+}
+
+export enum DocSortOption {
+  createdasc = 'createdasc',
+  createddesc = 'createddesc',
+  updatedasc = 'updatedasc',
+  updateddesc = 'updateddesc',
 }
