@@ -1,9 +1,13 @@
 {
   "name": "@spknetwork/graph-client",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A client for accessing the SPK network",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3speaknetwork/spk-graph-client.git"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
