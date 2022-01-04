@@ -41,29 +41,28 @@ function sortIsValid(docs: DocumentView[], firstId: string, secondId: string): b
 
 describe('spk client should operate', () => {
   let spkClient: SpkClient
+  let ceramic: CeramicClient
+  let loggedInDid = ''
   beforeAll(async () => {
-    const ceramic = global.ceramic as CeramicClient
-    if (!global.ceramic) {
+    ceramic = global.ceramic as CeramicClient
+    if (!ceramic) {
       throw new Error('ceramic session not available in the global namespace')
     }
+    loggedInDid = ceramic?.did?.id as any
     spkClient = new SpkClient(INDEXER_API_HOST, ceramic)
   })
 
   it('should index and return document', async () => {
     const docContent = { key: 'value' }
-    const doc2Content = { key: 'value' }
 
     const created = await spkClient.createDocument(docContent)
-    const created2 = await spkClient.createDocument(doc2Content)
-    await sleep(300)
-    try {
-      const fetched = await spkClient.fetchDocument(created.streamId)
 
-      expect(created.content).toEqual(fetched.content)
-      expect(created.createdAt).toEqual(fetched.createdAt)
-    } catch (err) {
-      console.error(`error fetching doc ${err}`)
-    }
+    const fetched = await spkClient.fetchDocument(created.streamId)
+
+    expect(created.content).toEqual(fetched.content)
+    expect(created.createdAt).toEqual(fetched.createdAt)
+    expect(created.creatorId).toEqual(fetched.creatorId)
+    expect(fetched.creatorId).toEqual(loggedInDid)
   })
 
   it('should get user docs from spk client', async () => {
@@ -72,7 +71,6 @@ describe('spk client should operate', () => {
 
     const created = await spkClient.createDocument(docContent)
     const created2 = await spkClient.createDocument(doc2Content)
-    await sleep(300)
 
     const userdocs = await spkClient.getDocumentsForUser(spkClient.loggedInDid)
 
@@ -89,7 +87,6 @@ describe('spk client should operate', () => {
     const parent = await spkClient.createDocument(parentContent)
     const child1 = await spkClient.createDocument(child1Content, parent.streamId)
     const child2 = await spkClient.createDocument(child2Content, parent.streamId)
-    await sleep(300)
 
     const childDocs = await spkClient.getDocumentChildren(parent.streamId)
     const returnedStreamIds = childDocs.map((doc) => doc.streamId)
@@ -105,7 +102,6 @@ describe('spk client should operate', () => {
     const parent = await spkClient.createDocument(parentContent)
     const firstChild = await spkClient.createDocument(child1Content, parent.streamId)
     const secondChild = await spkClient.createDocument(child2Content, parent.streamId)
-    await sleep(300)
 
     const childDocs = await spkClient.getDocumentChildren(parent.streamId)
     const returnedStreamIds = childDocs.map((doc) => doc.streamId)
@@ -149,7 +145,6 @@ describe('spk client should operate', () => {
 
     const firstDoc = await spkClient.createDocument(docContent)
     const secondDoc = await spkClient.createDocument(doc2Content)
-    await sleep(300)
 
     const userdocs = await spkClient.getDocumentsForUser(spkClient.loggedInDid)
 
@@ -192,14 +187,12 @@ describe('spk client should operate', () => {
     const docContent = { key: 'value1' }
 
     const created = await spkClient.createDocument(docContent)
-    await sleep(100)
     const fetchedOne = await spkClient.fetchDocument(created.streamId)
     expect(created.content).toEqual(fetchedOne.content)
 
     const newContent = { key: 'value2' }
 
     await spkClient.updateDocument(created.streamId, newContent)
-    await sleep(100)
     const fetchedTwo = await spkClient.fetchDocument(created.streamId)
 
     expect(fetchedTwo.content).toEqual(newContent)

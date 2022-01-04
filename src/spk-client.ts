@@ -31,7 +31,7 @@ export class SpkClient {
     try {
       doc = await TileDocument.load<CeramicDocContent>(this.ceramic, streamId)
     } catch (err: any) {
-      console.error(`Could not load doc for update: `, err.message)
+      console.error(`Could not load doc id '${streamId}' for update: `, err.message)
       throw err
     }
 
