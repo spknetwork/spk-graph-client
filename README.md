@@ -44,4 +44,6 @@ const userDocs = await spkClient.getDocumentsForUser("[Owning User DID]")
 const childDocs = await spkClient.getDocumentChildren("[Parent document stream ID]")
 ```
 
+# SPK indexer host list
 
+1. Public SPK indexer node https://us-01.infra.3speak.tv

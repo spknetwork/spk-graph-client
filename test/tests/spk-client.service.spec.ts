@@ -52,6 +52,15 @@ describe('spk client should operate', () => {
     spkClient = new SpkClient(INDEXER_API_HOST, ceramic)
   })
 
+  it('should get feed', async () => {
+    const docContent = { key: 'value' }
+
+    const created = await spkClient.createDocument(docContent)
+
+    const feed = await spkClient.getFeedDocs()
+    expect(feed.length).toBeGreaterThan(0)
+  })
+
   it('should index and return document', async () => {
     const docContent = { key: 'value' }
 
