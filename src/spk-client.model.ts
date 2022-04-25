@@ -42,3 +42,12 @@ export enum DocSortOption {
   updatedasc = 'updatedasc',
   updateddesc = 'updateddesc',
 }
+
+export interface SocialConnection {
+  connection_type?: string
+  target: string
+  target_type: string
+  namespace?: string
+  created_at?: Date
+  alias?: string
+}

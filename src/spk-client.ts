@@ -8,6 +8,7 @@ import base64url from 'base64url'
 import { randomBytes } from '@stablelib/random'
 import { IDX_ROOT_DOCS_KEY } from './common/constants'
 import { DocSortOption } from '.'
+import { SocialConnections } from './social-connections'
 
 export class SpkClient {
   /**
@@ -17,6 +18,7 @@ export class SpkClient {
 
   readonly apiClient: SpkIndexerApi
   readonly idx: IDX
+  social: SocialConnections
   constructor(private readonly spkIndexerHost: string, private readonly ceramic: CeramicClient) {
     this.apiClient = new SpkIndexerApi(spkIndexerHost)
     this.idx = new IDX({
@@ -24,6 +26,7 @@ export class SpkClient {
       ceramic: ceramic,
       aliases: ConfigService.getConfig().idxAliases,
     })
+    this.social = new SocialConnections(this)
   }
 
   public async updateDocument(streamId: string, content: unknown): Promise<void> {
