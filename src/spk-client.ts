@@ -1,6 +1,5 @@
-import { CeramicClient } from '@ceramicnetwork/http-client'
+import type { CeramicClient } from '@ceramicnetwork/http-client'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { IDX } from '@ceramicstudio/idx'
 import { ConfigService } from './config.service'
 import { CeramicDocContent, DocumentView } from './spk-client.model'
 import { SpkIndexerApi } from './spk-indexer-api.service'
@@ -9,6 +8,8 @@ import { randomBytes } from '@stablelib/random'
 import { IDX_ROOT_DOCS_KEY } from './common/constants'
 import { DocSortOption } from '.'
 import { SocialConnections } from './social-connections'
+import { DataModel } from '@glazed/datamodel'
+import { DIDDataStore } from '@glazed/did-datastore'
 
 export class SpkClient {
   /**
@@ -17,15 +18,34 @@ export class SpkClient {
    */
 
   readonly apiClient: SpkIndexerApi
-  readonly idx: IDX
+  // readonly idx: IDX
   social: SocialConnections
+  model: DataModel<any, { definitions: { profile: string }; schemas: { Profile: string }; tiles: {} }>
+  dataStore: DIDDataStore<any, string | number | symbol>
   constructor(private readonly spkIndexerHost: string, private readonly ceramic: CeramicClient) {
     this.apiClient = new SpkIndexerApi(spkIndexerHost)
-    this.idx = new IDX({
-      autopin: true,
-      ceramic: ceramic,
-      aliases: ConfigService.getConfig().idxAliases,
-    })
+    // this.idx = new IDX({
+    //   autopin: true,
+    //   ceramic: ceramic,
+    //   aliases: ConfigService.getConfig().idxAliases,
+    // })
+    
+
+        const aliases = {
+          definitions: {
+              profile: 'kjzl6cwe1jw145cjbeko9kil8g9bxszjhyde21ob8epxuxkaon1izyqsu8wgcic',
+            },
+            schemas: {
+              Profile:
+                'ceramic://k3y52l7qbv1frxt706gqfzmq6cbqdkptzk8uudaryhlkf6ly9vx21hqu4r6k1jqio',
+            },
+            tiles: {},
+        }
+        
+      const model = new DataModel({ ceramic: ceramic, aliases })
+      const dataStore = new DIDDataStore({ ceramic: ceramic, model })
+    this.model = model
+    this.dataStore = dataStore
     this.social = new SocialConnections(this)
   }
 
@@ -117,6 +137,7 @@ export class SpkClient {
     )
 
     // TODO: restrict this to parent docs only once corresponding backend features are ready
+    console.log(doc)
     try {
       await this.recordDocToRootPosts(doc.id.toString(), creatorId)
     } catch (err: any) {
@@ -139,7 +160,7 @@ export class SpkClient {
   public async recordDocToRootPosts(streamIdUrl: string, userDid: string): Promise<void> {
     const permlink = base64url.encode(randomBytes(6).buffer as Buffer)
 
-    let rootDocs = (await this.idx.get(IDX_ROOT_DOCS_KEY, userDid)) as Record<string, string>
+    let rootDocs = (await this.dataStore.get(IDX_ROOT_DOCS_KEY, userDid)) as Record<string, string>
     if (rootDocs) {
       rootDocs[permlink] = streamIdUrl
     } else {
@@ -148,6 +169,6 @@ export class SpkClient {
       }
     }
 
-    await this.idx.set(IDX_ROOT_DOCS_KEY, rootDocs)
+    await this.dataStore.set(IDX_ROOT_DOCS_KEY, rootDocs)
   }
 }

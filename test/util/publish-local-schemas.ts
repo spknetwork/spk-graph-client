@@ -6,7 +6,7 @@ import path from 'path'
 
 void (async () => {
   const ceramic = await getTestCeramicClient('http://localhost:7007')
-  const manager = new ModelManager(ceramic)
+  const manager = new ModelManager({ceramic})
   const schema = await manager.createSchema('rootPosts', {
     $schema: 'http://json-schema.org/draft-07/schema#',
     title: 'rootPosts',
@@ -28,7 +28,7 @@ void (async () => {
   const schemaUrl = manager.getSchemaURL(schema)
   console.log(schema)
   console.log(`SCHEMA URL`, schemaUrl)
-  const model = await manager.toPublished()
+  const model = await manager.model()
   console.log(model)
 
   const schemas: PublishedSchemas = {

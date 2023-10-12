@@ -1,4 +1,4 @@
-import CeramicClient from '@ceramicnetwork/http-client'
+import {CeramicClient} from '@ceramicnetwork/http-client'
 import { SpkClient } from '../../src/spk-client'
 import { differenceInMilliseconds } from 'date-fns'
 import { DocSortOption, DocumentView } from '../../src'
