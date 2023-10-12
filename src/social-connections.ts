@@ -15,7 +15,7 @@ export class SocialConnections {
     }
 
     async list() {
-        const connections:Record<string, SocialConnection> = await this.client.idx.get('socialConnectionIndex') || {}
+        const connections:Record<string, SocialConnection> = await this.client.dataStore.get('socialConnectionIndex') || {}
         return Object.values(connections).map(e => {
             //Parse ISO time to Date object
             if(e.created_at) {
@@ -26,7 +26,7 @@ export class SocialConnections {
     }
 
     async follow(did: string) {
-        const connections:Record<string, SocialConnection> = await this.client.idx.get('socialConnectionIndex') || {};
+        const connections:Record<string, SocialConnection> = await this.client.dataStore.get('socialConnectionIndex') || {};
         const key = `follow@${did}`; //Keys have no relevance in practice.. Iterate through index
         let alreadyExisting = false;
         for(let record of Object.values(connections)) {
@@ -43,17 +43,17 @@ export class SocialConnections {
             target_type: 'did',
             created_at: new Date().toISOString() as any
         }
-        await this.client.idx.set('socialConnectionIndex', connections)
+        await this.client.dataStore.set('socialConnectionIndex', connections)
     }
 
     async unfollow(did: string) {
-        const connections:Record<string, SocialConnection> = await this.client.idx.get('socialConnectionIndex') || {};
+        const connections:Record<string, SocialConnection> = await this.client.dataStore.get('socialConnectionIndex') || {};
         for(let [key, record] of Object.entries(connections)) {
             if(record.target === did) {
                 delete connections[key]
             }
         }
-        await this.client.idx.set('socialConnectionIndex', connections)
+        await this.client.dataStore.set('socialConnectionIndex', connections)
     }
 
 
@@ -65,14 +65,20 @@ export class SocialConnections {
      * 
      */
     protected async snapshot(args?: {unpin?: boolean}) {
-        const ownDoc = await this.client.idx._getOwnIDXDoc()
+        if(!this.client.ceramic.did?.id) {
+            return;
+        }
+        const ownDoc = await this.client.dataStore._getOwnIDXDoc(this.client.ceramic.did?.id)
+        if(!ownDoc) {
+            return;
+        }
         console.log(ownDoc.content, ownDoc.id.toString())
-        const aliasId = this.client.idx._aliases['socialConnectionIndex']
+        const aliasId = this.client.dataStore.getDefinitionID('socialConnectionIndex')
         console.log(aliasId)
         const oldId = ownDoc[aliasId];
-        const connectionsContent = await this.client.idx.get('socialConnectionIndex');
+        const connectionsContent = await this.client.dataStore.get('socialConnectionIndex');
         console.log(connectionsContent)
-        const tileDoc = await TileDocument.create(this.client.idx.ceramic, connectionsContent, {
+        const tileDoc = await TileDocument.create(this.client.dataStore.ceramic, connectionsContent, {
             family: aliasId
         })
         const ownDocContent = ownDoc.content || {}; 
@@ -80,7 +86,7 @@ export class SocialConnections {
         console.log(ownDoc)
 
         if(args?.unpin) {
-            await this.client.idx.ceramic.pin.rm(oldId)
+            await this.client.dataStore.ceramic.pin.rm(oldId)
         }
         await ownDoc.update(ownDocContent)
     }

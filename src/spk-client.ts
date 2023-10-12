@@ -20,20 +20,20 @@ export class SpkClient {
   readonly apiClient: SpkIndexerApi
   // readonly idx: IDX
   social: SocialConnections
-  model: DataModel<any, { definitions: { profile: string }; schemas: { Profile: string }; tiles: {} }>
   dataStore: DIDDataStore<any, string | number | symbol>
-  constructor(private readonly spkIndexerHost: string, private readonly ceramic: CeramicClient) {
+  ceramic: CeramicClient
+  model: DataModel<any, { definitions: { rootPosts: string; socialConnectionIndex: string }; schemas: { Profile: string }; tiles: {} }>
+  constructor(private readonly spkIndexerHost: string, ceramic: CeramicClient) {
     this.apiClient = new SpkIndexerApi(spkIndexerHost)
     // this.idx = new IDX({
     //   autopin: true,
     //   ceramic: ceramic,
     //   aliases: ConfigService.getConfig().idxAliases,
     // })
-    
 
         const aliases = {
           definitions: {
-              profile: 'kjzl6cwe1jw145cjbeko9kil8g9bxszjhyde21ob8epxuxkaon1izyqsu8wgcic',
+              ...ConfigService.getConfig().idxAliases
             },
             schemas: {
               Profile:
@@ -47,6 +47,7 @@ export class SpkClient {
     this.model = model
     this.dataStore = dataStore
     this.social = new SocialConnections(this)
+    this.ceramic = ceramic;
   }
 
   public async updateDocument(streamId: string, content: unknown): Promise<void> {
