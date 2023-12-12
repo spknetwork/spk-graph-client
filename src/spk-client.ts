@@ -139,8 +139,10 @@ export class SpkClient {
 
     // TODO: restrict this to parent docs only once corresponding backend features are ready
     console.log(doc)
+    let permlink
     try {
-      await this.recordDocToRootPosts(doc.id.toString(), creatorId)
+      const result = await this.recordDocToRootPosts(doc.id.toString(), creatorId)
+      permlink = result.permlink
     } catch (err: any) {
       console.error(`Error recording doc to root posts!`, err.message)
       throw err
@@ -155,10 +157,11 @@ export class SpkClient {
       content: doc.content.content,
       createdAt: doc.content.created_at,
       updatedAt: doc.content.updated_at,
+      permlink
     }
   }
 
-  public async recordDocToRootPosts(streamIdUrl: string, userDid: string): Promise<void> {
+  public async recordDocToRootPosts(streamIdUrl: string, userDid: string): Promise<{permlink: string}> {
     const permlink = base64url.encode(randomBytes(6).buffer as Buffer)
 
     let rootDocs = (await this.dataStore.get(IDX_ROOT_DOCS_KEY, userDid)) as Record<string, string>
@@ -171,5 +174,9 @@ export class SpkClient {
     }
 
     await this.dataStore.set(IDX_ROOT_DOCS_KEY, rootDocs)
+
+    return {
+      permlink
+    }
   }
 }

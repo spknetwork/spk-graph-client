@@ -27,6 +27,7 @@ export interface DocumentView {
   creatorId: string
   createdAt: string
   updatedAt: string
+  permlink: string
 }
 
 export interface CeramicDocContent {
